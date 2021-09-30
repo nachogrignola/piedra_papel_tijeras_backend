@@ -31,7 +31,7 @@ class Resultados extends REST_Controller {
   public function guardarResultado_post(){
 
     $data = $this ->post();
-    $items = explode(',', $data['items']);
+    $items = $data;
     $_SESSION['resultados'][] = $items;
     $respuesta = array('error' => FALSE,
                         'resultado' => $items);
