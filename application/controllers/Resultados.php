@@ -21,9 +21,9 @@ class Resultados extends REST_Controller {
                           'resultados' => $mostrarResultados);
       $this-> response($respuesta, REST_Controller::HTTP_OK);
     } else {
-      $respuesta = array('error' => TRUE,
-                          'mensaje' => 'El arreglo esta vacio');
-      $this-> response($respuesta, REST_Controller::HTTP_BAD_REQUEST);
+      $respuesta = array('message' => 'arreglo vacio',
+                          'resultados' => []);
+      $this-> response($respuesta, REST_Controller::HTTP_OK);
     }
 
   }
