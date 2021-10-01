@@ -1,21 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+
 require_once (APPPATH.'/libraries/REST_Controller.php');
 
 use Restserver\libraries\REST_Controller;
 
-session_start();
+
 
 class Resultados extends REST_Controller {
 
   public function __construct(){
-    header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
-    header("Access-Control-Allow-Origin: *");
 
     parent::__construct();
 
+    header("Access-Control-Allow-Methods: POST, PUT, DELETE, UPDATE");
+    header("Access-Control-Allow-Origin: * ");
+    header("Content-Type: application/json; charset=UTF-8");
+    header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+
+    $this->load->driver('cache', array('adapter' => 'apc', 'backup' => 'file'));
   }
 
   public function index() {
@@ -24,32 +29,40 @@ class Resultados extends REST_Controller {
 
   public function obtenerResultados_get() {
 
-    if (isset($_SESSION['resultados'])) {
-      $mostrarResultados = $_SESSION['resultados'];
+      $mostrarResultados = $this->cache->get('todos');
       $respuesta = array('error' => FALSE,
                           'resultados' => $mostrarResultados);
       $this-> response($respuesta, REST_Controller::HTTP_OK);
-    } else {
-      $respuesta = array('message' => 'arreglo vacio',
-                          'resultados' => []);
-      $this-> response($respuesta, REST_Controller::HTTP_OK);
-    }
+      return;
 
   }
 
   public function guardarResultado_post(){
-
     $data = $this ->post();
+    json_encode($data);
     $items = $data;
-    $_SESSION['resultados'][] = $items;
+    $arrayCargaData = array();
+
+    if($this->cache->get('resultado')){
+      $arrayCargaData = $this->cache->get('todos');
+      array_push($arrayCargaData, $items);
+    } else {
+      $this->cache->save('resultado', $items);
+      array_push($arrayCargaData, $items);
+    }
+
+    $this->cache->save('todos', $arrayCargaData, 3600);
     $respuesta = array('error' => FALSE,
-                        'resultado' => $items);
+                        'resultado' => $arrayCargaData);
     $this-> response($respuesta, REST_Controller::HTTP_OK);
+    return;
 
   }
 
   public function borrarResultados_delete(){
     if (session_destroy()){
+      $this->cache->delete('resultado');
+      $this->cache->delete('todos');
       $this-> response('200');
     } else {
       $this-> response('400');
