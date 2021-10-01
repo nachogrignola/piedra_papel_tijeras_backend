@@ -29,11 +29,20 @@ class Resultados extends REST_Controller {
 
   public function obtenerResultados_get() {
 
-      $mostrarResultados = $this->cache->get('todos');
-      $respuesta = array('error' => FALSE,
-                          'resultados' => $mostrarResultados);
-      $this-> response($respuesta, REST_Controller::HTTP_OK);
-      return;
+      if($this->cache->get('todos')){
+        $mostrarResultados = $this->cache->get('todos');
+        $mostrarResultados = array_slice($mostrarResultados, -10);
+        $mostrarResultados = array_reverse($mostrarResultados);
+        $respuesta = array('error' => FALSE,
+                            'resultados' => $mostrarResultados);
+        $this-> response($respuesta, REST_Controller::HTTP_OK);
+        return;
+      } else {
+        $respuesta = array('error' => FALSE,
+                            'resultados' => []);
+        $this-> response($respuesta, REST_Controller::HTTP_OK);
+        return;
+      }
 
   }
 
@@ -51,7 +60,7 @@ class Resultados extends REST_Controller {
       array_push($arrayCargaData, $items);
     }
 
-    $this->cache->save('todos', $arrayCargaData, 3600);
+    $this->cache->save('todos', $arrayCargaData);
     $respuesta = array('error' => FALSE,
                         'resultado' => $arrayCargaData);
     $this-> response($respuesta, REST_Controller::HTTP_OK);
