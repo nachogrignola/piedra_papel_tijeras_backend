@@ -60,13 +60,9 @@ class Resultados extends REST_Controller {
   }
 
   public function borrarResultados_delete(){
-    if (session_destroy()){
       $this->cache->delete('resultado');
       $this->cache->delete('todos');
       $this-> response('200');
-    } else {
-      $this-> response('400');
-    }
   }
 
 }
